@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "declaration": true,
+    "noEmit": false,
+    "inlineSources": false,
+    "sourceMap": true,
+    "alwaysStrict": true,
+    "moduleResolution": "node",
+    "outDir": "lib",
+    "strict": true,
+    "noUnusedLocals": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.js"]
+}

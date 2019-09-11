@@ -1,0 +1,33 @@
+container:
+  image: gcr.io/acme-dev/SOME-IMAGE-THAT-CONTAINS-NPM-AND-PULUMI:1.3.0
+  cpu: 2
+  memory: 4Gb
+
+env:
+  NPM_TOKEN: ENCRYPTED[!INSERT_CIRRUS_ORG_ENCRYPTED_VAR_HERE!]
+  # This env var below is required because npm otherwise attempts to downgrade permissions for nested scripts like `prepublishOnly`
+  # This is because most of our images run by default as root user and npm doesn't like that by default.
+  # If we don't set this var, buils break stuff like `cannot run in wd ...`.
+  npm_config_unsafe_perm: "true"
+
+.common:
+  baseTask: &baseTask
+    prepare_script: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    node_modules_cache:
+      folder: node_modules
+      fingerprint_script: sha1sum package-lock.json
+      populate_script: npm ci  
+
+test_task:
+  <<: *baseTask
+  test_script:
+    - npm test
+    - npm run build
+
+publish_task:
+  <<: *baseTask
+  depends_on:
+    - test
+  only_if: $CIRRUS_BRANCH == 'master'
+  AttemptPublish_script:
+    - npm publish || true
